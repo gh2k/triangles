@@ -67,6 +67,22 @@ void triangles::run()
   m_bestCandidate = m_target;
   m_currentCandidate = m_target;
 
+  cl_device_id device_id = m_devices[ ui.devices->currentIndex() ].first;
+
+  cl_context context = clCreateContext( 0, 1, &device_id, 0, 0, 0 );
+  if ( !context )
+  {
+    QMessageBox::critical( this, "OpenCL Error", "Failed to create an opencl device context" );
+    return;
+  }
+
+  cl_command_queue queue = clCreateCommandQueue( context, device_id, 0, 0 );
+  if ( !queue )
+  {
+    QMessageBox::critical( this, "OpenCL Error", "Failed to create an opencl command queue" );
+    return;
+  }
+
   // initialise everything
   int populationSize = ui.poolSize->value();
 
@@ -103,6 +119,59 @@ void triangles::run()
   int improvements = 0;
 
   logDir.remove( logDir.absoluteFilePath( "age." + QString::number( age ) + ".log" ) );
+
+  // set up the opencl image data
+  cl_image_format format = {
+    CL_ARGB, CL_UNSIGNED_INT8
+  };
+
+  // the target image will be read-only as we only use it on the gpu to compute the fitness
+  // we'll copy the data direcly to texture memory
+  cl_image cl_target = clCreateImage2D( context,
+                                        CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                                        &format,
+                                        m_target.width(),
+                                        m_target.height(),
+                                        m_target.bytesPerLine(),
+                                        m_target.bits(),
+                                        0 );
+
+  // the render image is where we will render our triangles
+  // it only needs to exist on the gpu, but we'll need to read it to copy it to the display
+  cl_image cl_render = clCreateImage2D( context,
+                                        CL_MEM_READ_WRITE,
+                                        &format,
+                                        m_target.width(),
+                                        m_target.height(),
+                                        m_target.bytesPerLine(),
+                                        0,
+                                        0 );
+
+  m_currentCandidate = m_target;
+  m_currentCandidate.fill( 0xffffffff );
+
+  // the current image represents the best image in the current culture
+  // it needs to be writable by the gpu, and will be copied to host memory
+  cl_image cl_current = clCreateImage2D( context,
+                                         CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                                         &format,
+                                         m_currentCandidate.width(),
+                                         m_currentCandidate.height(),
+                                         m_currentCandidate.bytesPerLine(),
+                                         m_currentCandidate.bits(),
+                                         0 );
+
+  m_bestCandidate = m_currentCandidate;
+  // the best image represents the best image in the current culture
+  // it needs to be writable by the gpu, and will be copied to host memory
+  cl_image cl_best = clCreateImage2D( context,
+                                      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                                      &format,
+                                      m_bestCandidate.width(),
+                                      m_bestCandidate.height(),
+                                      m_bestCandidate.bytesPerLine(),
+                                      m_bestCandidate.bits(),
+                                      0 );
 
   // loop until the user tells us to stop
   while( m_running )
@@ -360,6 +429,13 @@ void triangles::run()
       ++ count;
     }
   }
+
+  clReleaseMemObject( cl_best );
+  clReleaseMemObject( cl_current );
+  clReleaseMemObject( cl_render );
+  clReleaseMemObject( cl_target );
+  clReleaseCommandQueue( queue );
+  clReleaseContext( context );
 }
 
 void triangles::updateDialog( int iterations, quint64 acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations, double iterationsPerSec )

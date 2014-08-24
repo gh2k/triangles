@@ -36,7 +36,8 @@ macx:QMAKE_LFLAGS += -framework OpenCL
 
 OTHER_FILES += \
     README.md \
-    LICENSE
+    LICENSE \
+    triangles.cl
 
 RESOURCES += \
     triangles.qrc
