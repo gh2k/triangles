@@ -17,13 +17,23 @@
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
+      <widget class="QLabel" name="label_20">
+       <property name="text">
+        <string>Computation Device:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="devices"/>
+     </item>
+     <item row="1" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Triangle Count: (number of triangles in each scene)</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
+     <item row="1" column="1">
       <widget class="QSpinBox" name="triangleCount">
        <property name="minimum">
         <number>1</number>
@@ -33,14 +43,14 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="label_7">
        <property name="text">
         <string>Facial Weighting: (number of times more important face pixels are)</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="2" column="1">
       <widget class="QSpinBox" name="faceWeight">
        <property name="minimum">
         <number>0</number>
@@ -50,14 +60,14 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
+     <item row="3" column="0">
       <widget class="QLabel" name="label_9">
        <property name="text">
         <string>Population Size: (number of scenes per culture)</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="3" column="1">
       <widget class="QSpinBox" name="poolSize">
        <property name="minimum">
         <number>1</number>
@@ -67,14 +77,14 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="label_11">
        <property name="text">
         <string>Tournament Size: (best candidate vs more entropy)</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="4" column="1">
       <widget class="QSpinBox" name="tournamentSize">
        <property name="minimum">
         <number>1</number>
@@ -84,14 +94,14 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="5" column="0">
       <widget class="QLabel" name="label_12">
        <property name="text">
         <string>Mutation Strength: (%probability of more mutations per iteration)</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
+     <item row="5" column="1">
       <widget class="QSpinBox" name="mutationStrength">
        <property name="minimum">
         <number>0</number>
@@ -101,14 +111,14 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="6" column="0">
       <widget class="QLabel" name="label_15">
        <property name="text">
         <string>Initial Generations per Age: (number of iterations in first age)</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="6" column="1">
       <widget class="QSpinBox" name="generationCount">
        <property name="minimum">
         <number>1</number>
@@ -118,14 +128,14 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="0">
+     <item row="7" column="0">
       <widget class="QLabel" name="label_17">
        <property name="text">
         <string>Max Age: (number of ages)</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
+     <item row="7" column="1">
       <widget class="QSpinBox" name="maxAge">
        <property name="minimum">
         <number>1</number>
@@ -135,14 +145,14 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
+     <item row="8" column="0">
       <widget class="QLabel" name="label_18">
        <property name="text">
         <string>Update Frequency: (number of iterations between view updates)</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="1">
+     <item row="8" column="1">
       <widget class="QSpinBox" name="updateFrequency">
        <property name="minimum">
         <number>1</number>
@@ -152,14 +162,14 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="9" column="0">
       <widget class="QLabel" name="label_14">
        <property name="text">
         <string>Current age:</string>
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
+     <item row="9" column="1">
       <widget class="QLabel" name="age">
        <property name="font">
         <font>
@@ -172,14 +182,14 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="0">
+     <item row="10" column="0">
       <widget class="QLabel" name="label_13">
        <property name="text">
         <string>Current culture:</string>
        </property>
       </widget>
      </item>
-     <item row="9" column="1">
+     <item row="10" column="1">
       <widget class="QLabel" name="culture">
        <property name="font">
         <font>
@@ -192,14 +202,14 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="0">
+     <item row="11" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Current iteration:</string>
        </property>
       </widget>
      </item>
-     <item row="10" column="1">
+     <item row="11" column="1">
       <widget class="QLabel" name="iteration">
        <property name="font">
         <font>
@@ -212,14 +222,14 @@
        </property>
       </widget>
      </item>
-     <item row="11" column="0">
+     <item row="12" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Current Fitness:</string>
        </property>
       </widget>
      </item>
-     <item row="11" column="1">
+     <item row="12" column="1">
       <widget class="QLabel" name="currentFitness">
        <property name="font">
         <font>
@@ -232,14 +242,14 @@
        </property>
       </widget>
      </item>
-     <item row="12" column="0">
+     <item row="13" column="0">
       <widget class="QLabel" name="label_16">
        <property name="text">
         <string>Best Fitness:</string>
        </property>
       </widget>
      </item>
-     <item row="12" column="1">
+     <item row="13" column="1">
       <widget class="QLabel" name="bestFitness">
        <property name="font">
         <font>
@@ -252,14 +262,14 @@
        </property>
       </widget>
      </item>
-     <item row="13" column="0">
+     <item row="14" column="0">
       <widget class="QLabel" name="label_8">
        <property name="text">
         <string>Accepted Mutations:</string>
        </property>
       </widget>
      </item>
-     <item row="13" column="1">
+     <item row="14" column="1">
       <widget class="QLabel" name="acceptCount">
        <property name="font">
         <font>
@@ -272,14 +282,14 @@
        </property>
       </widget>
      </item>
-     <item row="14" column="0">
+     <item row="15" column="0">
       <widget class="QLabel" name="label_10">
        <property name="text">
         <string>Overall Improvements:</string>
        </property>
       </widget>
      </item>
-     <item row="14" column="1">
+     <item row="15" column="1">
       <widget class="QLabel" name="improvements">
        <property name="font">
         <font>
@@ -292,14 +302,14 @@
        </property>
       </widget>
      </item>
-     <item row="15" column="0">
+     <item row="16" column="0">
       <widget class="QLabel" name="label_19">
        <property name="text">
         <string>Iterations/sec</string>
        </property>
       </widget>
      </item>
-     <item row="15" column="1">
+     <item row="16" column="1">
       <widget class="QLabel" name="iterationsPerSec">
        <property name="font">
         <font>

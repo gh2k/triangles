@@ -32,6 +32,8 @@ FORMS    += triangles.ui
 macx:INCLUDEPATH += /usr/local/Cellar/opencv/2.4.9/include/
 macx:LIBS += -L/usr/local/Cellar/opencv/2.4.9/lib/ -lopencv_core -lopencv_objdetect -lopencv_imgproc
 
+macx:QMAKE_LFLAGS += -framework OpenCL
+
 OTHER_FILES += \
     README.md \
     LICENSE

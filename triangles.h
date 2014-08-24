@@ -6,6 +6,12 @@
 
 #include <QImage>
 
+#ifdef __APPLE__
+#include "OpenCL/opencl.h"
+#else
+#include "CL/cl.h"
+#endif
+
 #include "scene.h"
 
 /** Main dialog that runs all of the top-level logic and displays progres */
@@ -66,7 +72,11 @@ private:
 
   QVector< unsigned char * > m_pixelWeights;
 
+  QList< QPair< cl_device_id, QString > > m_devices;
+
   QString m_imageFilename;
+
+  cl_context m_openclContext;
 
   bool m_running;
   double m_bestFitness;

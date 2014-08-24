@@ -32,12 +32,26 @@ triangles::triangles(QWidget *parent, Qt::WindowFlags flags)
   connect( ui.stop, SIGNAL( clicked() ), this, SLOT( stop() ) );
   connect( ui.selectTarget, SIGNAL( clicked() ), this, SLOT( selectTarget() ) );
 
+  cl_uint num = 0;
+  clGetDeviceIDs( 0, CL_DEVICE_TYPE_ALL, 0, 0, &num );
+
+  cl_device_id devices[num];
+  clGetDeviceIDs( 0, CL_DEVICE_TYPE_ALL, num, devices, 0 );
+
+  for( uint i = 0; i < num; ++ i )
+  {
+    char name[256] = {};
+    clGetDeviceInfo( devices[i], CL_DEVICE_NAME, 255, name, 0 );
+
+    m_devices.append( qMakePair< cl_device_id, QString >( devices[i], QString( name ) ) );
+    ui.devices->addItem( QString( name ) );
+  }
+
   QThreadPool::globalInstance()->setMaxThreadCount( 32 );
 }
 
 triangles::~triangles()
 {
-
 }
 
 void triangles::calculateFitnessForScene( scene *scene, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight )
