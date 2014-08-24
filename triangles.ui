@@ -19,7 +19,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Triangle Count:</string>
+        <string>Triangle Count: (number of triangles in each scene)</string>
        </property>
       </widget>
      </item>
@@ -36,7 +36,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="label_7">
        <property name="text">
-        <string>Facial Weighting:</string>
+        <string>Facial Weighting: (number of times more important face pixels are)</string>
        </property>
       </widget>
      </item>
@@ -53,7 +53,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="label_9">
        <property name="text">
-        <string>Population Size:</string>
+        <string>Population Size: (number of scenes per culture)</string>
        </property>
       </widget>
      </item>
@@ -70,7 +70,7 @@
      <item row="3" column="0">
       <widget class="QLabel" name="label_11">
        <property name="text">
-        <string>Tournament Size:</string>
+        <string>Tournament Size: (best candidate vs more entropy)</string>
        </property>
       </widget>
      </item>
@@ -87,7 +87,7 @@
      <item row="4" column="0">
       <widget class="QLabel" name="label_12">
        <property name="text">
-        <string>Mutation Strength:</string>
+        <string>Mutation Strength: (%probability of more mutations per iteration)</string>
        </property>
       </widget>
      </item>
@@ -104,7 +104,7 @@
      <item row="5" column="0">
       <widget class="QLabel" name="label_15">
        <property name="text">
-        <string>Initial Generations per Age:</string>
+        <string>Initial Generations per Age: (number of iterations in first age)</string>
        </property>
       </widget>
      </item>
@@ -121,7 +121,7 @@
      <item row="6" column="0">
       <widget class="QLabel" name="label_17">
        <property name="text">
-        <string>Max Age:</string>
+        <string>Max Age: (number of ages)</string>
        </property>
       </widget>
      </item>
@@ -138,7 +138,7 @@
      <item row="7" column="0">
       <widget class="QLabel" name="label_18">
        <property name="text">
-        <string>Update Frequency:</string>
+        <string>Update Frequency: (number of iterations between view updates)</string>
        </property>
       </widget>
      </item>
@@ -155,7 +155,7 @@
      <item row="8" column="0">
       <widget class="QLabel" name="label_14">
        <property name="text">
-        <string>Age:</string>
+        <string>Current age:</string>
        </property>
       </widget>
      </item>
@@ -175,7 +175,7 @@
      <item row="9" column="0">
       <widget class="QLabel" name="label_13">
        <property name="text">
-        <string>Culture:</string>
+        <string>Current culture:</string>
        </property>
       </widget>
      </item>
@@ -195,7 +195,7 @@
      <item row="10" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Generation:</string>
+        <string>Current iteration:</string>
        </property>
       </widget>
      </item>
@@ -376,8 +376,6 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="triangles.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
