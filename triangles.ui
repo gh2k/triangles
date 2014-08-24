@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>901</width>
-    <height>769</height>
+    <height>780</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -281,6 +281,26 @@
      </item>
      <item row="14" column="1">
       <widget class="QLabel" name="improvements">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="0">
+      <widget class="QLabel" name="label_19">
+       <property name="text">
+        <string>Iterations/sec</string>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="1">
+      <widget class="QLabel" name="iterationsPerSec">
        <property name="font">
         <font>
          <weight>75</weight>

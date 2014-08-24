@@ -45,7 +45,7 @@ private:
   void updateCandidateView();
 
   /// updates all progress variables on the main dialog, and triggers an update of the candidate view
-  void updateDialog( int iterations, int acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations );
+  void updateDialog( int iterations, quint64 acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations, double iterationsPerSec );
 
   /// renders a scene and calcuates the similarity to the target image
   static void calculateFitnessForScene( scene *scene, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight );

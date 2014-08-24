@@ -59,6 +59,8 @@ void triangles::run()
   m_currentFitness = -1;
   m_bestFitness = -1;
 
+  double iterationsPerSec = 0;
+
   QList< scene* > previousAge;
   QList< scene* > nextAge;
 
@@ -77,16 +79,16 @@ void triangles::run()
   int culture = 0;
   int maxCultures = 0;
 
-  updateDialog( 0, 0, 0, 0, 0, 0, 0 ); 
+  updateDialog( 0, 0, 0, 0, 0, 0, 0, 0 );
 
   scene bestScene( 0, 0, 0, QColor() );
 
   int iterations = 0;
   int maxIterations = 0;
-  int acceptCount = 0;
+  quint64 acceptCount = 0;
   int improvements = 0;
 
-  logDir.remove( logDir.absoluteFilePath( "age." + QString().setNum( age ) + ".log" ) );
+  logDir.remove( logDir.absoluteFilePath( "age." + QString::number( age ) + ".log" ) );
 
   // loop until the user tells us to stop
   while( m_running )
@@ -102,11 +104,11 @@ void triangles::run()
     // this loop runs once per culture. age-management variables persist across runs
 
     // start by setting up the logs...
-    QFile cultureLogFile( logDir.absoluteFilePath( "culture." + QString().setNum( age ) + "." + QString().setNum( culture ) + ".log" ) );
+    QFile cultureLogFile( logDir.absoluteFilePath( "culture." + QString::number( age ) + "." + QString::number( culture ) + ".log" ) );
     cultureLogFile.open( QFile::WriteOnly | QFile::Truncate );
     QDataStream cultureLog( &cultureLogFile );
 
-    QFile ageLogFile( logDir.absoluteFilePath( "age." + QString().setNum( age ) + ".log" ) );
+    QFile ageLogFile( logDir.absoluteFilePath( "age." + QString::number( age ) + ".log" ) );
     ageLogFile.open( QFile::WriteOnly | QFile::Append );
     QDataStream ageLog( &ageLogFile );
 
@@ -164,11 +166,14 @@ void triangles::run()
     }
 
     // update the dialog with our starting variables
-    updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations );
+    updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations, iterationsPerSec );
 
     iterations = 0;
     acceptCount = 0;
     improvements = 0;
+
+    QElapsedTimer timer;
+    timer.start();
 
     // run the loop for the current culture (or indefinitely for the last culture)
     while ( ( maxIterations == 0 || iterations < maxIterations ) && m_running )
@@ -255,10 +260,12 @@ void triangles::run()
 
       ++ iterations;
 
+      iterationsPerSec = static_cast< double > ( iterations ) / static_cast< double > ( timer.elapsed() / 1000 );
+
       // update the window if we've covered enough iterations
       if ( iterations % ui.updateFrequency->value() == 0 )
       {
-        updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations );
+        updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations, iterationsPerSec );
       }
     }
 
@@ -280,16 +287,16 @@ void triangles::run()
       nextAge.clear();
       culture = 0;
       ++ age;
-      logDir.remove( logDir.absoluteFilePath( "age." + QString().setNum( age ) + ".log" ) );
+      logDir.remove( logDir.absoluteFilePath( "age." + QString::number( age ) + ".log" ) );
     }
 
-    updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations );
+    updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations, iterationsPerSec );
   }
 
   // the user has told us to stop...
 
   // update the screen
-  updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations );
+  updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations, iterationsPerSec );
 
   // delete everyhing that's left
   qDeleteAll( nextAge );
@@ -341,15 +348,16 @@ void triangles::run()
   }
 }
 
-void triangles::updateDialog( int iterations, int acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations )
+void triangles::updateDialog( int iterations, quint64 acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations, double iterationsPerSec )
 {
-  ui.iteration->setText( QString().setNum( iterations ) + "/" + QString().setNum( maxIterations ) );
-  ui.acceptCount->setText( QString().setNum( acceptCount ) );
-  ui.improvements->setText( QString().setNum( improvements ) );
-  ui.age->setText( QString().setNum( age ) );
-  ui.culture->setText( QString().setNum( culture ) + "/" + QString().setNum( maxCultures ) );
-  ui.bestFitness->setText( QString().setNum( m_bestFitness ) );
-  ui.currentFitness->setText( QString().setNum( m_currentFitness ) );
+  ui.iteration->setText( QString::number( iterations ) + "/" + QString::number( maxIterations ) );
+  ui.acceptCount->setText( QString::number( acceptCount ) );
+  ui.improvements->setText( QString::number( improvements ) );
+  ui.age->setText( QString::number( age ) );
+  ui.culture->setText( QString::number( culture ) + "/" + QString::number( maxCultures ) );
+  ui.bestFitness->setText( QString::number( m_bestFitness ) );
+  ui.currentFitness->setText( QString::number( m_currentFitness ) );
+  ui.iterationsPerSec->setText( QString::number( iterationsPerSec) );
   updateCandidateView();
   qApp->processEvents();
 }
