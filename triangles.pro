@@ -20,7 +20,12 @@ SOURCES += main.cpp\
     randomiser.cpp \
     scene.cpp
 
-HEADERS  += triangles.h
+HEADERS  += triangles.h \
+    facedetect.h \
+    mtrand.h \
+    poly.h \
+    randomiser.h \
+    scene.h
 
 FORMS    += triangles.ui
 
