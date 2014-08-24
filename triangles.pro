@@ -35,3 +35,6 @@ macx:LIBS += -L/usr/local/Cellar/opencv/2.4.9/lib/ -lopencv_core -lopencv_objdet
 OTHER_FILES += \
     README.md \
     LICENSE
+
+RESOURCES += \
+    triangles.qrc
