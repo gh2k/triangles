@@ -49,8 +49,11 @@ void triangles::calculateFitnessForScene( scene *scene, const QImage &target, co
 
 void triangles::run()
 {
+  // initialise the candates to m_target, to match format and size
   m_bestCandidate = m_target;
   m_currentCandidate = m_target;
+
+  // initialise everything
   int populationSize = ui.poolSize->value();
 
   m_currentFitness = -1;
@@ -85,8 +88,20 @@ void triangles::run()
 
   logDir.remove( logDir.absoluteFilePath( "age." + QString().setNum( age ) + ".log" ) );
 
+  // loop until the user tells us to stop
   while( m_running )
   {
+    // each age simulates a number of cultures over a set number of iterations.
+    // at the start of every new age, the best cultures from the previous age are selected and merged into a smaller number
+    // of cultures by placing the best scene from each into a new scene pool
+
+    // one culture simulates one attempt to find the best fitness from a given starting point over a certain number of iterations
+    // each culture has a scene pool of a certaion size. for each iteration, the scene pool is mutated and scenes are cross-bred
+    // with each other. the scenes with the best fitness survive to the next iteration.
+
+    // this loop runs once per culture. age-management variables persist across runs
+
+    // start by setting up the logs...
     QFile cultureLogFile( logDir.absoluteFilePath( "culture." + QString().setNum( age ) + "." + QString().setNum( culture ) + ".log" ) );
     cultureLogFile.open( QFile::WriteOnly | QFile::Truncate );
     QDataStream cultureLog( &cultureLogFile );
@@ -95,10 +110,15 @@ void triangles::run()
     ageLogFile.open( QFile::WriteOnly | QFile::Append );
     QDataStream ageLog( &ageLogFile );
 
+    // our pool of scenes for the current culture
     QList< scene* > pool;
 
+    // the maximum number of cultures for the given age
     maxCultures = 0;
+    // run many more iterations for future ages, as we hit diminishing returns
     maxIterations = ( ui.generationCount->value() * ( 1 << age ) );
+
+    // run more cultures in earlier ages, so we can throw away the items with the lowest fitness more swiftly
     for( int i = 0; i < ui.maxAge->value() - age; ++ i )
     {
       if ( maxCultures == 0 )
@@ -109,9 +129,11 @@ void triangles::run()
     if ( age == ui.maxAge->value() )
       maxIterations = 0;
 
+    // set up the current pool
     m_currentFitness = -1;
     if ( previousAge.isEmpty() )
     {
+      // if there's no previous age, we're in the first age so initialise the pool with random values
       for( int i = 0; i < populationSize; ++ i )
       {
         pool.append( new scene( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) ) );
@@ -119,12 +141,14 @@ void triangles::run()
         pool[i]->setFitness( getFitness( m_currentCandidate, m_target, m_pixelWeights, m_faceWeight ) );
       }
     } else {
+      // randomly take scenes from theprevious age to populate this one
       for( int i = 0; i < populationSize; ++ i )
       {
         pool.append( new scene( *previousAge[ randomiser::randomInt( previousAge.count() ) ] ) );
       }
     }
 
+    // calculate the current and best fitness for this age, based on the new culture
     for( int i = 0; i < populationSize; ++ i )
     {
       if ( pool[i]->fitness() < m_currentFitness || m_currentFitness < 0 )
@@ -139,31 +163,42 @@ void triangles::run()
       }
     }
 
+    // update the dialog with our starting variables
     updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations );
 
     iterations = 0;
     acceptCount = 0;
     improvements = 0;
 
+    // run the loop for the current culture (or indefinitely for the last culture)
     while ( ( maxIterations == 0 || iterations < maxIterations ) && m_running )
     {
+      // set up containers for the current generation, and the next
       QSet< scene * > gen1( pool.toSet() );
       QList< scene * > gen2;
+
       QList< QFuture< void > > futures;
+
+      // take scenes at random from the pool, in pairs...
       while( pool.count() )
       {
         scene *p1 = pool.takeAt( randomiser::randomInt( pool.count() ) );
         scene *p2 = pool.takeAt( randomiser::randomInt( pool.count() ) );
+        // cross-breed and mutate the pair
         QPair< scene*, scene* > children = p1->breed( *p2, ui.mutationStrength->value() );
 
+        // run the fitness function for the newly-generated children using the thread pool
         futures << QtConcurrent::run( calculateFitnessForScene, children.first, m_target, m_pixelWeights, m_faceWeight );
         futures << QtConcurrent::run( calculateFitnessForScene, children.second, m_target, m_pixelWeights, m_faceWeight );
+
+        // add both parents and both clildren to the next generation's pool
         gen2 << p1;
         gen2 << p2;
         gen2 << children.first;
         gen2 << children.second;
       }
 
+      // wait for the fitness functions from this generation to complete
       while( futures.count() )
       {
         while( futures.last().isRunning() )
@@ -171,8 +206,10 @@ void triangles::run()
         futures.takeLast();
       }
 
+      // sort the next generation by fitness
       qSort( gen2.begin(), gen2.end(), sceneHasBetterFitness );
 
+      // if the next generation has a better fitness than the current best fitness, update the candidate data
       if ( gen2.first()->fitness() < m_currentFitness )
       {
         ++ improvements;
@@ -193,12 +230,15 @@ void triangles::run()
         }
       }
 
+      // populate the next pool
       for( int i = 0; i < populationSize; ++ i )
       {
         if ( i == 0 )
         {
+          // always include the best candidate
           pool.append( gen2.takeFirst() );
         } else {
+          // take other candidates at random from the best n results (where n is the tournament size) to keep the gene pool more varied
           int selection = randomiser::randomInt( ui.tournamentSize->value() );
           scene *s = gen2.takeAt( selection );
           if ( ! gen1.contains( s ) )
@@ -209,22 +249,30 @@ void triangles::run()
         }
       }
 
+      // clear the next pool and sort the current data, ready for another iteration
       qDeleteAll( gen2 );
       qSort( pool.begin(), pool.end(), sceneHasBetterFitness );
 
       ++ iterations;
 
+      // update the window if we've covered enough iterations
       if ( iterations % ui.updateFrequency->value() == 0 )
       {
         updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations );
       }
     }
 
+    // we've completed all the iterations for the culture...
+
+    // write the best candidate to the age log, and place into the next age
     ageLog << *pool.first();
     nextAge.append( pool.takeFirst() );
+
+    // clear the pool and advance to the next culture
     qDeleteAll( pool );
     ++ culture;
 
+    // if we've been through all the cultures, advance to the next age
     if ( culture == maxCultures )
     {
       qDeleteAll( previousAge );
@@ -238,13 +286,19 @@ void triangles::run()
     updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations );
   }
 
+  // the user has told us to stop...
+
+  // update the screen
   updateDialog( iterations, acceptCount, improvements, age, culture, maxCultures, maxIterations );
 
+  // delete everyhing that's left
   qDeleteAll( nextAge );
   qDeleteAll( previousAge );
 
+  // save the best scene to an svg
   bestScene.saveToSvg( logDir.absoluteFilePath( "bestPicture.svg" ) );
 
+  // iterate over the best scenes file, so that we can see the history of all improvements
   bestScenesFile.close();
   bestScenesFile.open( QFile::ReadOnly );
   QDataStream bestScenesLoader( &bestScenesFile );
@@ -264,6 +318,7 @@ void triangles::run()
     ++ count;
   }
 
+  // write out the best svgs for each individual culture
   QStringList filters;
   filters.append( "age.*.log" );
   //filters.append( "culture.*.log" );
@@ -406,6 +461,7 @@ double triangles::getFitness( const QImage &candidate, const QImage &target, con
     const uchar *candidateLine = candidate.scanLine( y );
     const uchar *weights = pixelWeights[y];
 
+    // calculates the difference between pixels on the two images
     for( int x = 0; x < w; ++ x )
     {
       double dB = (double)(*(targetLine++) - *(candidateLine++));
@@ -413,6 +469,9 @@ double triangles::getFitness( const QImage &candidate, const QImage &target, con
       double dR = (double)(*(targetLine++) - *(candidateLine++));
       ++targetLine; ++candidateLine;
 
+      // larger number is better. multiplies pixels detected as part of a face by faceWeight
+      // this gives a better weighting to face pixels and will accept candidates that have a better
+      // match for those areas
       double pixelFitness = (dR * dR + dG * dG + dB * dB) * (double)(faceWeight * weights[x] + 1 );
 
       f += pixelFitness;

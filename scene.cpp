@@ -39,9 +39,14 @@ void scene::mutate( int mutationStrength )
   m_fitness = 0;
   do
   {
+    // loop until mutationStrenth says we should stop
+
+    // randomly select a triangle to modify
     int p = randomiser::randomInt( m_polys.size() );
+    // randomly select the type of modification
     int type = randomiser::randomInt( poly::Randomize );
 
+    // if we're swapping z order, move to a different position in the list
     if ( type < poly::SwapZ )
     {
       int other = randomiser::randomInt( m_polys.size() );
@@ -51,8 +56,10 @@ void scene::mutate( int mutationStrength )
     }
     else
     {
+      // otherwise mutate the triangle
       m_polys[p]->mutate( (poly::MutationType) type );
     }
+    // until we roll a number less than mutationStrength
   } while ( randomiser::randomInt( 100 ) < mutationStrength ) ;
 }
 
@@ -96,6 +103,9 @@ scene &scene::operator=( const scene &s )
 
 QPair< scene*, scene* > scene::breed( scene &other, int mutationStrength )
 {
+  // create two new scenes from this and one other, merging data from the two and
+  // mutating some parameters
+
   scene *left = new scene( 0, m_width, m_height, m_backgroundColor );
   scene *right = new scene( 0, m_width, m_height, m_backgroundColor );
 

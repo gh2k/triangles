@@ -8,6 +8,8 @@
 
 #include "scene.h"
 
+/** Main dialog that runs all of the top-level logic and displays progres */
+
 class triangles : public QDialog
 {
   Q_OBJECT
@@ -21,22 +23,34 @@ protected:
   virtual void resizeEvent( QResizeEvent *e );
 
 private slots:
+  /// top-level method that runs the whole thing
   void run();
+
+  /// selects the target image via a file dialog
   void selectTarget();
+  /// resets all values to defaults
   void clear();
+  /// tells the simulation to stop
   void stop();
 
 private:
 
+  /// removes a directory, recursively
   static bool removeDir(const QString &dirName);
   
+  /// calculates the fitness for a particular image (how similar it is to the candidate image)
   static double getFitness( const QImage &candidate, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight );
 
+  /// re-renders the current candidate, to show progress
   void updateCandidateView();
+
+  /// updates all progress variables on the main dialog, and triggers an update of the candidate view
   void updateDialog( int iterations, int acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations );
 
+  /// renders a scene and calcuates the similarity to the target image
   static void calculateFitnessForScene( scene *scene, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight );
 
+  /// compares two scenes, and returns true if scene a has better fitnesss
   inline static bool sceneHasBetterFitness( scene *a, scene *b ) { return a->fitness() < b->fitness(); }
   
   Ui::trianglesClass ui;
