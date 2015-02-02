@@ -24,14 +24,23 @@ triangles::triangles(QWidget *parent, Qt::WindowFlags flags)
   ui.bestCandidate->setScene( new QGraphicsScene( this ) );
   ui.target->setScene( new QGraphicsScene( this ) );
 
+  ui.inputFrameGroup->setCurrentIndex( 0 );
+
   m_running = false;
   clear();
+
+  m_oclWrapper.CheckOpenCL();
 
   connect( ui.reset, SIGNAL( clicked() ), this, SLOT( clear() ) );
   connect( ui.start, SIGNAL( clicked() ), this, SLOT( run() ) );
   connect( ui.stop, SIGNAL( clicked() ), this, SLOT( stop() ) );
   connect( ui.selectTarget, SIGNAL( clicked() ), this, SLOT( selectTarget() ) );
   connect( ui.useFlames, SIGNAL( toggled(bool) ), this, SLOT( setFrame() ) );
+
+  foreach( std::string platform, m_oclWrapper.PlatformNames() )
+    ui.openclPlatform->addItem( QString::fromStdString( platform ) );
+
+  populateDeviceList();
 
   QThreadPool::globalInstance()->setMaxThreadCount( 32 );
 }
@@ -548,4 +557,12 @@ void triangles::setFrame()
     ui.inputFrameGroup->setCurrentIndex(0);
   else
     ui.inputFrameGroup->setCurrentIndex(1);
+}
+
+void triangles::populateDeviceList()
+{
+  ui.openclDevice->clear();
+
+  foreach( std::string device, m_oclWrapper.DeviceNames( ui.openclPlatform->currentIndex() ) )
+    ui.openclDevice->addItem( QString::fromStdString( device ) );
 }

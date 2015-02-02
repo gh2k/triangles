@@ -38,6 +38,9 @@ private slots:
   /// sets the correct input frame on radio button selection
   void setFrame();
 
+  /// populates the opencl device list when the platform is changed
+  void populateDeviceList();
+
 private:
 
   /// removes a directory, recursively
