@@ -1,0 +1,3 @@
+[submodule "fractorium"]
+	path = fractorium
+	url = git@github.com:gh2k/fractorium.git
