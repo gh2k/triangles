@@ -31,6 +31,7 @@ triangles::triangles(QWidget *parent, Qt::WindowFlags flags)
   connect( ui.start, SIGNAL( clicked() ), this, SLOT( run() ) );
   connect( ui.stop, SIGNAL( clicked() ), this, SLOT( stop() ) );
   connect( ui.selectTarget, SIGNAL( clicked() ), this, SLOT( selectTarget() ) );
+  connect( ui.useFlames, SIGNAL( toggled(bool) ), this, SLOT( setFrame() ) );
 
   QThreadPool::globalInstance()->setMaxThreadCount( 32 );
 }
@@ -539,4 +540,12 @@ bool triangles::removeDir(const QString &dirName)
   }
 
   return result;
+}
+
+void triangles::setFrame()
+{
+  if (ui.useTriangles->isChecked())
+    ui.inputFrameGroup->setCurrentIndex(0);
+  else
+    ui.inputFrameGroup->setCurrentIndex(1);
 }

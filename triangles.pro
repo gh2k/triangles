@@ -47,6 +47,31 @@ INCLUDEPATH += ./fractorium/Source/Ember
 INCLUDEPATH += ./fractorium/Source/EmberCL
 INCLUDEPATH += ./fractorium/Source/EmberCommon
 
+INCLUDEPATH += /usr/include/libxml2
+
+QMAKE_CXXFLAGS += -std=c++11
+
+# fractorium doesn't care about warnings! ^_^
+CONFIG += warn_off
+QMAKE_CXXFLAGS += -Wnon-virtual-dtor
+QMAKE_CXXFLAGS += -Wshadow
+QMAKE_CXXFLAGS += -Winit-self
+QMAKE_CXXFLAGS += -Wredundant-decls
+QMAKE_CXXFLAGS += -Wcast-align
+QMAKE_CXXFLAGS += -Winline
+QMAKE_CXXFLAGS += -Wunreachable-code
+QMAKE_CXXFLAGS += -Wmissing-include-dirs
+QMAKE_CXXFLAGS += -Wswitch-enum
+QMAKE_CXXFLAGS += -Wswitch-default
+QMAKE_CXXFLAGS += -Wmain
+QMAKE_CXXFLAGS += -Wzero-as-null-pointer-constant
+QMAKE_CXXFLAGS += -Wfatal-errors
+QMAKE_CXXFLAGS += -Wall -fpermissive
+QMAKE_CXXFLAGS += -Wold-style-cast
+QMAKE_CXXFLAGS += -Wno-unused-parameter
+QMAKE_CXXFLAGS += -Wno-unused-function
+QMAKE_CXXFLAGS += -Wold-style-cast
+
 SOURCES += main.cpp\
         triangles.cpp \
     facedetect.cpp \

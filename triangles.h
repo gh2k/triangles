@@ -8,6 +8,8 @@
 
 #include "scene.h"
 
+#include "EmberCommonPch.h"
+
 /** Main dialog that runs all of the top-level logic and displays progres */
 
 class triangles : public QDialog
@@ -32,6 +34,9 @@ private slots:
   void clear();
   /// tells the simulation to stop
   void stop();
+
+  /// sets the correct input frame on radio button selection
+  void setFrame();
 
 private:
 
@@ -71,6 +76,8 @@ private:
   bool m_running;
   double m_bestFitness;
   double m_currentFitness;
+
+  OpenCLWrapper m_oclWrapper;
 
 };
 

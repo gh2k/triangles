@@ -15,134 +15,292 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QGridLayout" name="gridLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_20">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+         <underline>true</underline>
+        </font>
+       </property>
+       <property name="text">
+        <string>Method</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="useTriangles">
+       <property name="text">
+        <string>Triangles</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="useFlames">
+       <property name="text">
+        <string>Flames</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QStackedWidget" name="inputFrameGroup">
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <widget class="QWidget" name="page">
+      <layout class="QGridLayout" name="gridLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Triangle Count: (number of triangles in each scene)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="triangleCount">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Facial Weighting: (number of times more important face pixels are)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="faceWeight">
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>255</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Population Size: (number of scenes per culture)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="poolSize">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Tournament Size: (best candidate vs more entropy)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="tournamentSize">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>Mutation Strength: (%probability of more mutations per iteration)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="mutationStrength">
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>99</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Initial Generations per Age: (number of iterations in first age)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QSpinBox" name="generationCount">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Max Age: (number of ages)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QSpinBox" name="maxAge">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="page_2">
+      <layout class="QGridLayout" name="gridLayout_3">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="QFrame" name="frame_2">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <layout class="QFormLayout" name="formLayout_3">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_21">
+              <property name="text">
+               <string>OpenCL Platform</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="openclPlatform"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_22">
+              <property name="text">
+               <string>OpenCL Device</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="openclDevice"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_23">
+              <property name="text">
+               <string>Population Size</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QSpinBox" name="flamePopulationSize"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>623</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QFormLayout" name="formLayout_2">
      <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Triangle Count: (number of triangles in each scene)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QSpinBox" name="triangleCount">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>10000</number>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>Facial Weighting: (number of times more important face pixels are)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QSpinBox" name="faceWeight">
-       <property name="minimum">
-        <number>0</number>
-       </property>
-       <property name="maximum">
-        <number>255</number>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_9">
-       <property name="text">
-        <string>Population Size: (number of scenes per culture)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QSpinBox" name="poolSize">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>10000</number>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_11">
-       <property name="text">
-        <string>Tournament Size: (best candidate vs more entropy)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QSpinBox" name="tournamentSize">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>10000</number>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_12">
-       <property name="text">
-        <string>Mutation Strength: (%probability of more mutations per iteration)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QSpinBox" name="mutationStrength">
-       <property name="minimum">
-        <number>0</number>
-       </property>
-       <property name="maximum">
-        <number>99</number>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_15">
-       <property name="text">
-        <string>Initial Generations per Age: (number of iterations in first age)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QSpinBox" name="generationCount">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>999999999</number>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_17">
-       <property name="text">
-        <string>Max Age: (number of ages)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QSpinBox" name="maxAge">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>999999999</number>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
       <widget class="QLabel" name="label_18">
        <property name="text">
         <string>Update Frequency: (number of iterations between view updates)</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="1">
+     <item row="0" column="1">
       <widget class="QSpinBox" name="updateFrequency">
        <property name="minimum">
         <number>1</number>
@@ -152,14 +310,14 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="1" column="0">
       <widget class="QLabel" name="label_14">
        <property name="text">
         <string>Current age:</string>
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
+     <item row="1" column="1">
       <widget class="QLabel" name="age">
        <property name="font">
         <font>
@@ -172,14 +330,14 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="label_13">
        <property name="text">
         <string>Current culture:</string>
        </property>
       </widget>
      </item>
-     <item row="9" column="1">
+     <item row="2" column="1">
       <widget class="QLabel" name="culture">
        <property name="font">
         <font>
@@ -192,14 +350,14 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="0">
+     <item row="3" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Current iteration:</string>
        </property>
       </widget>
      </item>
-     <item row="10" column="1">
+     <item row="3" column="1">
       <widget class="QLabel" name="iteration">
        <property name="font">
         <font>
@@ -212,14 +370,14 @@
        </property>
       </widget>
      </item>
-     <item row="11" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Current Fitness:</string>
        </property>
       </widget>
      </item>
-     <item row="11" column="1">
+     <item row="4" column="1">
       <widget class="QLabel" name="currentFitness">
        <property name="font">
         <font>
@@ -232,14 +390,14 @@
        </property>
       </widget>
      </item>
-     <item row="12" column="0">
+     <item row="5" column="0">
       <widget class="QLabel" name="label_16">
        <property name="text">
         <string>Best Fitness:</string>
        </property>
       </widget>
      </item>
-     <item row="12" column="1">
+     <item row="5" column="1">
       <widget class="QLabel" name="bestFitness">
        <property name="font">
         <font>
@@ -252,14 +410,14 @@
        </property>
       </widget>
      </item>
-     <item row="13" column="0">
+     <item row="6" column="0">
       <widget class="QLabel" name="label_8">
        <property name="text">
         <string>Accepted Mutations:</string>
        </property>
       </widget>
      </item>
-     <item row="13" column="1">
+     <item row="6" column="1">
       <widget class="QLabel" name="acceptCount">
        <property name="font">
         <font>
@@ -272,14 +430,14 @@
        </property>
       </widget>
      </item>
-     <item row="14" column="0">
+     <item row="7" column="0">
       <widget class="QLabel" name="label_10">
        <property name="text">
         <string>Overall Improvements:</string>
        </property>
       </widget>
      </item>
-     <item row="14" column="1">
+     <item row="7" column="1">
       <widget class="QLabel" name="improvements">
        <property name="font">
         <font>
@@ -292,14 +450,14 @@
        </property>
       </widget>
      </item>
-     <item row="15" column="0">
+     <item row="8" column="0">
       <widget class="QLabel" name="label_19">
        <property name="text">
         <string>Iterations/sec</string>
        </property>
       </widget>
      </item>
-     <item row="15" column="1">
+     <item row="8" column="1">
       <widget class="QLabel" name="iterationsPerSec">
        <property name="font">
         <font>
@@ -316,12 +474,14 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Current Candidate</string>
-       </property>
-      </widget>
+     <item row="1" column="2">
+      <widget class="QGraphicsView" name="target"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QGraphicsView" name="bestCandidate"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QGraphicsView" name="currentCandidate"/>
      </item>
      <item row="0" column="1">
       <widget class="QLabel" name="label_4">
@@ -337,14 +497,12 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QGraphicsView" name="currentCandidate"/>
-     </item>
-     <item row="1" column="1">
-      <widget class="QGraphicsView" name="bestCandidate"/>
-     </item>
-     <item row="1" column="2">
-      <widget class="QGraphicsView" name="target"/>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Current Candidate</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
