@@ -78,14 +78,16 @@ SOURCES += main.cpp\
     mtrand.cpp \
     poly.cpp \
     randomiser.cpp \
-    scene.cpp
+    trianglescene.cpp \
+    abstractscene.cpp
 
 HEADERS  += triangles.h \
     facedetect.h \
     mtrand.h \
     poly.h \
     randomiser.h \
-    scene.h
+    trianglescene.h \
+    abstractscene.h
 
 FORMS    += triangles.ui
 

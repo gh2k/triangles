@@ -6,21 +6,21 @@
 
 #include "randomiser.h"
 
-poly::poly( int width, int height )
+Poly::Poly( int width, int height )
 {
   m_width = width;
   m_height = height;
 
-  m_color = QColor( randomiser::randomInt( 255 ), randomiser::randomInt( 255 ), randomiser::randomInt( 255 ), randomiser::randomInt( 255 ) );
+  m_color = QColor( Randomiser::randomInt( 255 ), Randomiser::randomInt( 255 ), Randomiser::randomInt( 255 ), Randomiser::randomInt( 255 ) );
   m_points.resize( 3 );
 
   for( int i = 0; i < m_points.size(); ++ i )
   {
-    m_points[i] = QPoint( randomiser::randomInt( width ), randomiser::randomInt( height ) );
+    m_points[i] = QPoint( Randomiser::randomInt( width ), Randomiser::randomInt( height ) );
   }
 }
 
-poly::poly( const poly &other )
+Poly::Poly( const Poly &other )
 {
   m_width = other.m_width;
   m_height = other.m_height;
@@ -28,12 +28,12 @@ poly::poly( const poly &other )
   m_color = other.m_color;
 }
 
-poly::~poly()
+Poly::~Poly()
 {
 
 }
 
-poly &poly::operator = ( const poly &other )
+Poly &Poly::operator = ( const Poly &other )
 {
   m_width = other.m_width;
   m_height = other.m_height;
@@ -42,58 +42,58 @@ poly &poly::operator = ( const poly &other )
   return *this;
 }
 
-void poly::renderTo( QPainter &painter )
+void Poly::renderTo( QPainter &painter )
 {
   painter.setBrush( QBrush( m_color ) );
   painter.drawPolygon( QPolygon( m_points ) );
 }
 
-void poly::mutate( MutationType mt )
+void Poly::mutate( MutationType mt )
 {
   if( mt < MoveCorner )
   {
-    int corner = randomiser::randomInt( m_points.size() );
-    m_points[corner] = QPoint( randomiser::randomInt( m_width ), randomiser::randomInt( m_height ) );
+    int corner = Randomiser::randomInt( m_points.size() );
+    m_points[corner] = QPoint( Randomiser::randomInt( m_width ), Randomiser::randomInt( m_height ) );
   }
   else if ( mt < TweakChannel )
   {
-    int channel = randomiser::randomInt( 4 );
+    int channel = Randomiser::randomInt( 4 );
     switch ( channel )
     {
     case 0:
-      m_color.setRed( randomiser::randomInt( 255 ) );
+      m_color.setRed( Randomiser::randomInt( 255 ) );
       break;
     case 1:
-      m_color.setGreen( randomiser::randomInt( 255 ) );
+      m_color.setGreen( Randomiser::randomInt( 255 ) );
       break;
     case 2:
-      m_color.setBlue( randomiser::randomInt( 255 ) );
+      m_color.setBlue( Randomiser::randomInt( 255 ) );
       break;
     case 3:
-      m_color.setAlpha( randomiser::randomInt( 255 ) );
+      m_color.setAlpha( Randomiser::randomInt( 255 ) );
       break;
     }
   }
   else if ( mt < Relocate )
   {
     for( int i = 0; i < m_points.size(); ++ i )
-      m_points[i] = QPoint( randomiser::randomInt( m_width ), randomiser::randomInt( m_height ) );
+      m_points[i] = QPoint( Randomiser::randomInt( m_width ), Randomiser::randomInt( m_height ) );
   }
   else if ( mt < Randomize )
   {
     for( int i = 0; i < m_points.size(); ++ i )
-      m_points[i] = QPoint( randomiser::randomInt( m_width ), randomiser::randomInt( m_height ) );
-    m_color = QColor( randomiser::randomInt( 255 ), randomiser::randomInt( 255 ), randomiser::randomInt( 255 ), randomiser::randomInt( 255 ) );
+      m_points[i] = QPoint( Randomiser::randomInt( m_width ), Randomiser::randomInt( m_height ) );
+    m_color = QColor( Randomiser::randomInt( 255 ), Randomiser::randomInt( 255 ), Randomiser::randomInt( 255 ), Randomiser::randomInt( 255 ) );
   }
 }
 
-void poly::uniformCrossover( poly *d1, poly *d2, poly *s1, poly *s2 )
+void Poly::uniformCrossover( Poly *d1, Poly *d2, Poly *s1, Poly *s2 )
 {
   for( int i = 0; i < s1->m_points.size() + 4; ++ i )
   {
-    poly *cd1 = d1;
-    poly *cd2 = d2;
-    if ( randomiser::randomInt( 2 ) == 0 )
+    Poly *cd1 = d1;
+    Poly *cd2 = d2;
+    if ( Randomiser::randomInt( 2 ) == 0 )
     {
       cd1 = d2;
       cd2 = d1;
@@ -124,14 +124,14 @@ void poly::uniformCrossover( poly *d1, poly *d2, poly *s1, poly *s2 )
   }
 }
 
-QDataStream &operator << ( QDataStream &ds, const poly &p )
+QDataStream &operator << ( QDataStream &ds, const Poly &p )
 {
   ds << p.m_points;
   ds << p.m_color;
   return ds;
 }
 
-QDataStream &operator >> ( QDataStream &ds, poly &p )
+QDataStream &operator >> ( QDataStream &ds, Poly &p )
 {
   ds >> p.m_points;
   ds >> p.m_color;

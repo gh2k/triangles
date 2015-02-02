@@ -4,7 +4,7 @@
 #include <QDateTime>
 #include <qmath.h>
 
-int randomiser::randomInt( int size )
+int Randomiser::randomInt( int size )
 {
   static MTRand mt( QDateTime::currentMSecsSinceEpoch() );
 

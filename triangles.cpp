@@ -11,11 +11,11 @@
 #include <QSvgGenerator>
 #include <QMessageBox>
 
-#include "scene.h"
+#include "trianglescene.h"
 #include "facedetect.h"
 #include "randomiser.h"
 
-triangles::triangles(QWidget *parent, Qt::WindowFlags flags)
+Triangles::Triangles(QWidget *parent, Qt::WindowFlags flags)
     : QDialog(parent, flags)
 {
   ui.setupUi(this);
@@ -45,19 +45,19 @@ triangles::triangles(QWidget *parent, Qt::WindowFlags flags)
   QThreadPool::globalInstance()->setMaxThreadCount( 32 );
 }
 
-triangles::~triangles()
+Triangles::~Triangles()
 {
 
 }
 
-void triangles::calculateFitnessForScene( scene *scene, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight )
+void Triangles::calculateFitnessForScene( AbstractScene *scene, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight )
 {
   QImage candidateImage( target );
   scene->renderTo( candidateImage );
   scene->setFitness( getFitness( candidateImage, target, pixelWeights, faceWeight ) );
 }
 
-void triangles::run()
+void Triangles::run()
 {
   // initialise the candates to m_target, to match format and size
   m_bestCandidate = m_target;
@@ -71,8 +71,8 @@ void triangles::run()
 
   double iterationsPerSec = 0;
 
-  QList< scene* > previousAge;
-  QList< scene* > nextAge;
+  QList< AbstractScene* > previousAge;
+  QList< AbstractScene* > nextAge;
 
   QDir logDir( m_imageFilename + ".triangles" );
   removeDir( m_imageFilename + ".triangles" );
@@ -91,7 +91,7 @@ void triangles::run()
 
   updateDialog( 0, 0, 0, 0, 0, 0, 0, 0 );
 
-  scene bestScene( 0, 0, 0, QColor() );
+  AbstractScene *bestScene = new TriangleScene( 0, 0, 0, QColor() );
 
   int iterations = 0;
   int maxIterations = 0;
@@ -123,7 +123,7 @@ void triangles::run()
     QDataStream ageLog( &ageLogFile );
 
     // our pool of scenes for the current culture
-    QList< scene* > pool;
+    QList< AbstractScene* > pool;
 
     // the maximum number of cultures for the given age
     maxCultures = 0;
@@ -148,7 +148,7 @@ void triangles::run()
       // if there's no previous age, we're in the first age so initialise the pool with random values
       for( int i = 0; i < populationSize; ++ i )
       {
-        pool.append( new scene( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) ) );
+        pool.append( new TriangleScene( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) ) );
         pool[i]->renderTo( m_currentCandidate );
         pool[i]->setFitness( getFitness( m_currentCandidate, m_target, m_pixelWeights, m_faceWeight ) );
       }
@@ -156,7 +156,7 @@ void triangles::run()
       // randomly take scenes from theprevious age to populate this one
       for( int i = 0; i < populationSize; ++ i )
       {
-        pool.append( new scene( *previousAge[ randomiser::randomInt( previousAge.count() ) ] ) );
+        pool.append( previousAge[ Randomiser::randomInt( previousAge.count() ) ]->clone() );
       }
     }
 
@@ -189,18 +189,18 @@ void triangles::run()
     while ( ( maxIterations == 0 || iterations < maxIterations ) && m_running )
     {
       // set up containers for the current generation, and the next
-      QSet< scene * > gen1( pool.toSet() );
-      QList< scene * > gen2;
+      QSet< AbstractScene * > gen1( pool.toSet() );
+      QList< AbstractScene * > gen2;
 
       QList< QFuture< void > > futures;
 
       // take scenes at random from the pool, in pairs...
       while( pool.count() )
       {
-        scene *p1 = pool.takeAt( randomiser::randomInt( pool.count() ) );
-        scene *p2 = pool.takeAt( randomiser::randomInt( pool.count() ) );
+        AbstractScene *p1 = pool.takeAt( Randomiser::randomInt( pool.count() ) );
+        AbstractScene *p2 = pool.takeAt( Randomiser::randomInt( pool.count() ) );
         // cross-breed and mutate the pair
-        QPair< scene*, scene* > children = p1->breed( *p2, ui.mutationStrength->value() );
+        QPair< AbstractScene*, AbstractScene* > children = p1->breed( p2, ui.mutationStrength->value() );
 
         // run the fitness function for the newly-generated children using the thread pool
         futures << QtConcurrent::run( calculateFitnessForScene, children.first, m_target, m_pixelWeights, m_faceWeight );
@@ -229,17 +229,18 @@ void triangles::run()
       {
         ++ improvements;
         m_currentFitness = gen2.first()->fitness();
-        cultureLog << *gen2.first();
+        gen2.first()->saveToStream( cultureLog );
 
         gen2.first()->renderTo( m_currentCandidate );
 
         if ( m_currentFitness < m_bestFitness )
         {
           m_bestFitness = m_currentFitness;
-          bestScene = *gen2.first();
+          delete bestScene;
+          bestScene = gen2.first()->clone();
           bestScenes << iterations;
           bestScenes << m_currentFitness;
-          bestScenes << *gen2.first();
+          bestScene->saveToStream( bestScenes );
 
           gen2.first()->renderTo( m_bestCandidate );
         }
@@ -254,8 +255,8 @@ void triangles::run()
           pool.append( gen2.takeFirst() );
         } else {
           // take other candidates at random from the best n results (where n is the tournament size) to keep the gene pool more varied
-          int selection = randomiser::randomInt( ui.tournamentSize->value() );
-          scene *s = gen2.takeAt( selection );
+          int selection = Randomiser::randomInt( ui.tournamentSize->value() );
+          AbstractScene *s = gen2.takeAt( selection );
           if ( ! gen1.contains( s ) )
           {
             ++ acceptCount;
@@ -282,7 +283,7 @@ void triangles::run()
     // we've completed all the iterations for the culture...
 
     // write the best candidate to the age log, and place into the next age
-    ageLog << *pool.first();
+    pool.first()->saveToStream( ageLog );
     nextAge.append( pool.takeFirst() );
 
     // clear the pool and advance to the next culture
@@ -313,7 +314,7 @@ void triangles::run()
   qDeleteAll( previousAge );
 
   // save the best scene to an svg
-  bestScene.saveToSvg( logDir.absoluteFilePath( "bestPicture.svg" ) );
+  bestScene->saveToFile( logDir.absoluteFilePath( "bestPicture.svg" ) );
 
   // iterate over the best scenes file, so that we can see the history of all improvements
   bestScenesFile.close();
@@ -329,11 +330,13 @@ void triangles::run()
     bestScenesLoader >> iteration;
     bestScenesLoader >> fitness;
     QString bsFilePath = bsDir.absoluteFilePath( QString( "%1.%2.svg" ).arg( count, 7, 10, QLatin1Char( '0' ) ).arg( iteration ) );
-    scene s( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) );
-    bestScenesLoader >> s;
-    s.saveToSvg( bsFilePath );
+    TriangleScene s( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) );
+    s.loadFromStream( bestScenesLoader );
+    s.saveToFile( bsFilePath );
     ++ count;
   }
+
+  delete bestScene;
 
   // write out the best svgs for each individual culture
   QStringList filters;
@@ -350,15 +353,15 @@ void triangles::run()
     while( !d.atEnd() )
     {
       QString fp = entryDir.absoluteFilePath( QString( "%1.svg" ).arg( count, 7, 10, QLatin1Char( '0' ) ) );
-      scene s( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) );
-      d >> s;
-      s.saveToSvg( fp );
+      TriangleScene s( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) );
+      s.loadFromStream( d );
+      s.saveToFile( fp );
       ++ count;
     }
   }
 }
 
-void triangles::updateDialog( int iterations, quint64 acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations, double iterationsPerSec )
+void Triangles::updateDialog( int iterations, quint64 acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations, double iterationsPerSec )
 {
   ui.iteration->setText( QString::number( iterations ) + "/" + QString::number( maxIterations ) );
   ui.acceptCount->setText( QString::number( acceptCount ) );
@@ -372,12 +375,12 @@ void triangles::updateDialog( int iterations, quint64 acceptCount, int improveme
   qApp->processEvents();
 }
 
-void triangles::stop()
+void Triangles::stop()
 {
   m_running = false;
 }
 
-void triangles::clear()
+void Triangles::clear()
 {
   ui.iteration->setText( "0" );
   ui.triangleCount->setValue( 20 );
@@ -406,7 +409,7 @@ void triangles::clear()
   ui.currentCandidate->scene()->clear();
 }
 
-void triangles::selectTarget()
+void Triangles::selectTarget()
 {
   QString imageFile( QFileDialog::getOpenFileName( this, "Select Image" ) );
   if ( imageFile.length() )
@@ -451,7 +454,7 @@ void triangles::selectTarget()
   }
 }
 
-void triangles::resizeEvent( QResizeEvent *e )
+void Triangles::resizeEvent( QResizeEvent *e )
 {
   Q_UNUSED( e );
 
@@ -468,7 +471,7 @@ void triangles::resizeEvent( QResizeEvent *e )
     ui.bestCandidate->fitInView( items.first(), Qt::KeepAspectRatio );
 }
 
-double triangles::getFitness( const QImage &candidate, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight )
+double Triangles::getFitness( const QImage &candidate, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight )
 {
   double f = 0;
   int w = target.width();
@@ -499,7 +502,7 @@ double triangles::getFitness( const QImage &candidate, const QImage &target, con
   return f;
 }
 
-void triangles::updateCandidateView()
+void Triangles::updateCandidateView()
 {
   QGraphicsPixmapItem *item = 0;
   if ( ui.bestCandidate->scene()->items().count() == 0 )
@@ -527,7 +530,7 @@ void triangles::updateCandidateView()
   ui.currentCandidate->fitInView( item, Qt::KeepAspectRatio );
 }
 
-bool triangles::removeDir(const QString &dirName)
+bool Triangles::removeDir(const QString &dirName)
 {
   bool result = true;
   QDir dir(dirName);
@@ -551,7 +554,7 @@ bool triangles::removeDir(const QString &dirName)
   return result;
 }
 
-void triangles::setFrame()
+void Triangles::setFrame()
 {
   if (ui.useTriangles->isChecked())
     ui.inputFrameGroup->setCurrentIndex(0);
@@ -559,7 +562,7 @@ void triangles::setFrame()
     ui.inputFrameGroup->setCurrentIndex(1);
 }
 
-void triangles::populateDeviceList()
+void Triangles::populateDeviceList()
 {
   ui.openclDevice->clear();
 

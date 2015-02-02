@@ -9,11 +9,11 @@ class QPainter;
 
 /** Althogh called 'poly', this class actually describes a triangle to be rendered into a scene */
 
-class poly
+class Poly
 {
 public:
-  friend QDataStream &operator << ( QDataStream &ds, const poly &s );
-  friend QDataStream &operator >> ( QDataStream &ds, poly &s );
+  friend QDataStream &operator << ( QDataStream &ds, const Poly &s );
+  friend QDataStream &operator >> ( QDataStream &ds, Poly &s );
 
   /// defines ways the triangle can be mutated, with probabilities
   enum MutationType {
@@ -30,10 +30,10 @@ public:
   };
 
   /// initialise a random triagle within a scene bounded by width and height
-  poly( int width, int height );
+  Poly( int width, int height );
   /// initialise a triangle from another
-  poly( const poly &other );
-  virtual ~poly();
+  Poly( const Poly &other );
+  virtual ~Poly();
 
   /// mutates the triangle, based on the mutation type supplied
   void mutate( MutationType mutationType );
@@ -41,12 +41,12 @@ public:
   void renderTo( QPainter &painter );
 
   /// assigns the data from another triangle to this one
-  poly &operator = ( const poly &other );
+  Poly &operator = ( const Poly &other );
 
   /// merges the data from two triangles, to breed a new one
   /// randomly selects values from either d1 or d2 into s1, and copies
   /// the values from the opposite triangle into s2
-  static void uniformCrossover( poly *d1, poly *d2, poly *s1, poly *s2 );
+  static void uniformCrossover( Poly *d1, Poly *d2, Poly *s1, Poly *s2 );
 
 private:
   QVector< QPoint > m_points;

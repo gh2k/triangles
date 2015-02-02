@@ -1,7 +1,7 @@
 #ifndef RANDOMISER_H
 #define RANDOMISER_H
 
-class randomiser
+class Randomiser
 {
 public:
   static int randomInt( int size );
