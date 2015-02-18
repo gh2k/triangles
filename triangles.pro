@@ -16,6 +16,8 @@ FRACTORIUM_DIR = $$(HOME)/Dev/fractorium/Bin
 LIBS += -L$$FRACTORIUM_DIR -lEmber
 LIBS += -L$$FRACTORIUM_DIR -lEmberCL
 
+LIBS += -lxml2
+
 macx {
   LIBS += -framework OpenGL
   LIBS += -framework OpenCL
@@ -79,7 +81,8 @@ SOURCES += main.cpp\
     poly.cpp \
     randomiser.cpp \
     trianglescene.cpp \
-    abstractscene.cpp
+    abstractscene.cpp \
+    emberscene.cpp
 
 HEADERS  += triangles.h \
     facedetect.h \
@@ -87,7 +90,8 @@ HEADERS  += triangles.h \
     poly.h \
     randomiser.h \
     trianglescene.h \
-    abstractscene.h
+    abstractscene.h \
+    emberscene.h
 
 FORMS    += triangles.ui
 

@@ -17,20 +17,28 @@ TriangleScene::TriangleScene( int polyCount, int width, int height, const QColor
 }
 
 TriangleScene::TriangleScene( const TriangleScene &s )
-  :m_polys( s.m_polys.size() )
+  :AbstractScene( s ), m_polys( s.m_polys.size() )
 {
   for( int i = 0; i < m_polys.size(); ++ i )
     m_polys[i] = new Poly( *s.m_polys[i] );
   m_width = s.m_width;
   m_height = s.m_height;
   m_backgroundColor = s.m_backgroundColor;
-  setFitness( s.fitness() );
 }
 
 TriangleScene::~TriangleScene()
 {
   for( int i = 0; i < m_polys.size(); ++ i )
     delete m_polys[i];
+}
+
+void TriangleScene::randomise()
+{
+  for( int i = 0; i < m_polys.size(); ++ i )
+  {
+    delete m_polys[i];
+    m_polys[i] = new Poly( m_width, m_height );
+  }
 }
 
 void TriangleScene::mutateOnce()
@@ -57,11 +65,13 @@ void TriangleScene::mutateOnce()
   }
 }
 
-void TriangleScene::renderTo( QImage &image )
+bool TriangleScene::renderTo( QImage &image )
 {
   QPainter painter( &image );
   painter.fillRect( 0, 0, m_width, m_height, m_backgroundColor );
   drawTo( painter );
+
+  return true;
 }
 
 void TriangleScene::drawTo( QPicture &picture )

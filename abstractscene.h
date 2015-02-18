@@ -7,6 +7,7 @@ class AbstractScene
 {
 public:
   AbstractScene();
+  AbstractScene( const AbstractScene &other );
   virtual ~AbstractScene();
 
   /// returns the cached fitness for this scene
@@ -15,7 +16,9 @@ public:
   void setFitness( double _fitness ) { m_fitness = _fitness; }
 
   /// renders the scene to an image
-  virtual void renderTo( QImage &image ) = 0;
+  virtual bool renderTo( QImage &image ) = 0;
+
+  virtual void randomise() = 0;
 
   /// saves the scene to a non-bitmap file (such as svg, xml)
   virtual void saveToFile( const QString &fn ) = 0;

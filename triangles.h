@@ -8,7 +8,7 @@
 
 #include "trianglescene.h"
 
-#include "EmberCommonPch.h"
+#include <OpenCLWrapper.h>
 
 /** Main dialog that runs all of the top-level logic and displays progres */
 
@@ -80,7 +80,7 @@ private:
   double m_bestFitness;
   double m_currentFitness;
 
-  OpenCLWrapper m_oclWrapper;
+  EmberCLns::OpenCLWrapper m_oclWrapper;
 
 };
 

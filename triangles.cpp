@@ -12,6 +12,7 @@
 #include <QMessageBox>
 
 #include "trianglescene.h"
+#include "emberscene.h"
 #include "facedetect.h"
 #include "randomiser.h"
 
@@ -53,12 +54,29 @@ Triangles::~Triangles()
 void Triangles::calculateFitnessForScene( AbstractScene *scene, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight )
 {
   QImage candidateImage( target );
-  scene->renderTo( candidateImage );
+  while ( ! scene->renderTo( candidateImage ) )
+    scene->randomise();
+
   scene->setFitness( getFitness( candidateImage, target, pixelWeights, faceWeight ) );
 }
 
 void Triangles::run()
 {
+  enum scenetype { TRIANGLES, EMBERS };
+
+  scenetype scenetype = TRIANGLES;
+  if ( ui.useFlames->isChecked() )
+    scenetype = EMBERS;
+
+  if ( scenetype == EMBERS )
+  {
+    if ( ! EmberScene::initialiseRenderer( ui.palettesFile->text(), ui.openclPlatform->currentIndex(), ui.openclDevice->currentIndex() ) )
+    {
+      QMessageBox::critical( this, "Derp!", "Couldn't initialise opencl renderer" );
+      return;
+    }
+  }
+
   // initialise the candates to m_target, to match format and size
   m_bestCandidate = m_target;
   m_currentCandidate = m_target;
@@ -91,7 +109,12 @@ void Triangles::run()
 
   updateDialog( 0, 0, 0, 0, 0, 0, 0, 0 );
 
-  AbstractScene *bestScene = new TriangleScene( 0, 0, 0, QColor() );
+  AbstractScene *bestScene = 0;
+
+  if ( scenetype == TRIANGLES )
+    bestScene = new TriangleScene( 0, 0, 0, QColor() );
+  if ( scenetype == EMBERS )
+    bestScene = new EmberScene( 300, 300 );
 
   int iterations = 0;
   int maxIterations = 0;
@@ -148,8 +171,14 @@ void Triangles::run()
       // if there's no previous age, we're in the first age so initialise the pool with random values
       for( int i = 0; i < populationSize; ++ i )
       {
-        pool.append( new TriangleScene( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) ) );
-        pool[i]->renderTo( m_currentCandidate );
+        if ( scenetype == TRIANGLES )
+          pool.append( new TriangleScene( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) ) );
+        if ( scenetype == EMBERS )
+          pool.append( new EmberScene( m_target.width(), m_target.height() ) );
+
+        while ( !pool[i]->renderTo( m_currentCandidate ) )
+          pool[i]->randomise();
+
         pool[i]->setFitness( getFitness( m_currentCandidate, m_target, m_pixelWeights, m_faceWeight ) );
       }
     } else {
@@ -166,11 +195,13 @@ void Triangles::run()
       if ( pool[i]->fitness() < m_currentFitness || m_currentFitness < 0 )
       {
         m_currentFitness = pool[i]->fitness();
+
         pool[i]->renderTo( m_currentCandidate );
       }
       if ( pool[i]->fitness() < m_bestFitness || m_bestFitness < 0 )
       {
         m_bestFitness = pool[i]->fitness();
+
         pool[i]->renderTo( m_bestCandidate );
       }
     }
@@ -229,7 +260,8 @@ void Triangles::run()
       {
         ++ improvements;
         m_currentFitness = gen2.first()->fitness();
-        gen2.first()->saveToStream( cultureLog );
+        if ( scenetype != EMBERS )
+          gen2.first()->saveToStream( cultureLog );
 
         gen2.first()->renderTo( m_currentCandidate );
 
@@ -240,7 +272,8 @@ void Triangles::run()
           bestScene = gen2.first()->clone();
           bestScenes << iterations;
           bestScenes << m_currentFitness;
-          bestScene->saveToStream( bestScenes );
+          if ( scenetype != EMBERS )
+            bestScene->saveToStream( bestScenes );
 
           gen2.first()->renderTo( m_bestCandidate );
         }
@@ -283,7 +316,8 @@ void Triangles::run()
     // we've completed all the iterations for the culture...
 
     // write the best candidate to the age log, and place into the next age
-    pool.first()->saveToStream( ageLog );
+    if ( scenetype != EMBERS )
+      pool.first()->saveToStream( ageLog );
     nextAge.append( pool.takeFirst() );
 
     // clear the pool and advance to the next culture
@@ -330,9 +364,23 @@ void Triangles::run()
     bestScenesLoader >> iteration;
     bestScenesLoader >> fitness;
     QString bsFilePath = bsDir.absoluteFilePath( QString( "%1.%2.svg" ).arg( count, 7, 10, QLatin1Char( '0' ) ).arg( iteration ) );
-    TriangleScene s( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) );
-    s.loadFromStream( bestScenesLoader );
-    s.saveToFile( bsFilePath );
+
+    AbstractScene *s = 0;
+
+    if ( scenetype == TRIANGLES )
+      s = new TriangleScene( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) );
+
+    if ( scenetype == EMBERS )
+      s = new EmberScene( m_target.width(), m_target.height() );
+
+    if ( scenetype != EMBERS )
+    {
+      s->loadFromStream( bestScenesLoader );
+      s->saveToFile( bsFilePath );
+    }
+
+    delete s;
+
     ++ count;
   }
 
@@ -353,12 +401,24 @@ void Triangles::run()
     while( !d.atEnd() )
     {
       QString fp = entryDir.absoluteFilePath( QString( "%1.svg" ).arg( count, 7, 10, QLatin1Char( '0' ) ) );
-      TriangleScene s( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) );
-      s.loadFromStream( d );
-      s.saveToFile( fp );
+      AbstractScene *s = 0;
+
+      if ( scenetype == TRIANGLES )
+        s = new TriangleScene( ui.triangleCount->value(), m_target.width(), m_target.height(), QColor( 255, 255, 255, 255 ) );
+
+      if ( scenetype == EMBERS )
+        s = new EmberScene( m_target.width(), m_target.height() );
+
+      s->loadFromStream( d );
+      s->saveToFile( fp );
+      delete s;
+
       ++ count;
     }
   }
+
+  if ( scenetype == EMBERS )
+    EmberScene::destroyRenderer();
 }
 
 void Triangles::updateDialog( int iterations, quint64 acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations, double iterationsPerSec )
@@ -384,13 +444,13 @@ void Triangles::clear()
 {
   ui.iteration->setText( "0" );
   ui.triangleCount->setValue( 20 );
-  ui.poolSize->setValue( 100 );
-  ui.tournamentSize->setValue( 15 );
-  ui.mutationStrength->setValue( 50 );
+  ui.poolSize->setValue( 10 );
+  ui.tournamentSize->setValue( 2 );
+  ui.mutationStrength->setValue( 0 );
   ui.generationCount->setValue( 10000 );
   ui.faceWeight->setValue( 10 );
-  ui.maxAge->setValue( 3 );
-  ui.updateFrequency->setValue( 10 );
+  ui.maxAge->setValue( 1 );
+  ui.updateFrequency->setValue( 1 );
   ui.age->setText( "0" );
   ui.culture->setText( "0" );
   ui.currentFitness->setText( "0" );

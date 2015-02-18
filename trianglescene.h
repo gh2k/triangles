@@ -27,10 +27,12 @@ public:
   virtual QPair< AbstractScene*, AbstractScene* > breed( AbstractScene *other, int mutationStrength );
 
   // rendering methods
-  virtual void renderTo( QImage &image );
+  virtual bool renderTo( QImage &image );
   void drawTo( QPicture &image );
   void drawTo( QPainter &image );
   virtual void saveToFile( const QString &fn );
+
+  virtual void randomise();
 
   virtual AbstractScene *clone() const;
 

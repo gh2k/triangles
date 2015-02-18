@@ -7,6 +7,11 @@ AbstractScene::AbstractScene()
   m_fitness = 0.0;
 }
 
+AbstractScene::AbstractScene( const AbstractScene &other )
+{
+  m_fitness = other.m_fitness;
+}
+
 AbstractScene::~AbstractScene()
 {
 }
