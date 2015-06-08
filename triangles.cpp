@@ -277,7 +277,7 @@ void Triangles::run()
           if ( scenetype != EMBERS )
             bestScene->saveToStream( bestScenes );
 
-          gen2.first()->renderTo( m_bestCandidate );
+          m_bestCandidate = m_currentCandidate;
         }
       }
 
