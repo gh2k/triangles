@@ -8,6 +8,8 @@
 #include <RendererCL.h>
 #include <OpenCLWrapper.h>
 
+#include "x11_undefs.h"
+
 #include <QMutex>
 #include <QException>
 
@@ -51,6 +53,8 @@ protected:
   virtual void mutateOnce();
 
 private:
+  static const unsigned int MAX_XFORMS;
+
   static QMutex s_renderMutex;
   static EmberCLns::RendererCL<EMBER_PRECISION> *s_renderer;
   static EmberNs::SheepTools<EMBER_PRECISION, EMBER_PRECISION> *s_tools;
@@ -59,6 +63,8 @@ private:
   int m_height;
 
   EmberNs::Ember<EMBER_PRECISION> m_ember;
+
+  static const std::vector<EmberNs::eVariationId> &vars();
 };
 
 #endif // EMBERSCENE_H

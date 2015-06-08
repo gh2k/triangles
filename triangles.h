@@ -7,6 +7,7 @@
 #include <QImage>
 
 #include "trianglescene.h"
+#include <qmath.h>
 
 #include <OpenCLWrapper.h>
 

@@ -20,5 +20,9 @@
 #undef Bool
 #endif
 
+#ifdef CursorShape
+#undef CursorShape
+#endif
+
 #endif // X11_UNDEFS_H
 

@@ -9,6 +9,48 @@ QMutex EmberScene::s_renderMutex;
 EmberCLns::RendererCL<EMBER_PRECISION> *EmberScene::s_renderer = 0;
 EmberNs::SheepTools<EMBER_PRECISION, EMBER_PRECISION> *EmberScene::s_tools = 0;
 
+const unsigned int EmberScene::MAX_XFORMS = 5;
+
+const std::vector<EmberNs::eVariationId> &EmberScene::vars()
+{
+  static std::vector<EmberNs::eVariationId> vars;
+  if ( vars.size() == 0 )
+  {
+    std::vector<EmberNs::eVariationId> noVars;
+
+    // nicked from emberGenome -- don't use these vars
+    EmberNs::VariationList<EMBER_PRECISION> varList;
+    noVars.push_back(VAR_NOISE);
+    noVars.push_back(VAR_BLUR);
+    noVars.push_back(VAR_GAUSSIAN_BLUR);
+    noVars.push_back(VAR_RADIAL_BLUR);
+    noVars.push_back(VAR_NGON);
+    noVars.push_back(VAR_SQUARE);
+    noVars.push_back(VAR_RAYS);
+    noVars.push_back(VAR_CROSS);
+    noVars.push_back(VAR_PRE_BLUR);
+    noVars.push_back(VAR_SEPARATION);
+    noVars.push_back(VAR_SPLIT);
+    noVars.push_back(VAR_SPLITS);
+
+    //Loop over the novars and set ivars to the complement.
+    for (int i = 0; i < varList.Size(); i++)
+    {
+      int j;
+      for (j = 0; j < noVars.size(); j++)
+      {
+        if (noVars[j] == varList.GetVariation(i)->VariationId())
+          break;
+      }
+
+      if (j == noVars.size())
+        vars.push_back(varList.GetVariation(i)->VariationId());
+      }
+  }
+
+  return vars;
+}
+
 EmberScene::EmberScene( int width, int height )
   :AbstractScene()
 {
@@ -46,7 +88,11 @@ EmberScene::~EmberScene()
 void EmberScene::randomise()
 {
   if ( s_tools )
-    s_tools->Random( m_ember );
+  {
+    do {
+      s_tools->Random( m_ember );
+    } while ( m_ember.XformCount() > MAX_XFORMS );
+  }
   else
     throw EmberRendererNotInitialisedException();
 
@@ -66,8 +112,13 @@ QPair< AbstractScene*, AbstractScene* > EmberScene::breed( AbstractScene *other,
 
   EmberScene *emberOther = dynamic_cast< EmberScene* > ( other );
 
-  s_tools->Cross( this->m_ember, emberOther->m_ember, left->m_ember, CROSS_NOT_SPECIFIED );
-  s_tools->Cross( emberOther->m_ember, this->m_ember, right->m_ember, CROSS_NOT_SPECIFIED );
+  do {
+    s_tools->Cross( this->m_ember, emberOther->m_ember, left->m_ember, CROSS_NOT_SPECIFIED );
+  } while ( left->m_ember.XformCount() > MAX_XFORMS );
+
+  do {
+    s_tools->Cross( emberOther->m_ember, this->m_ember, right->m_ember, CROSS_NOT_SPECIFIED );
+  } while ( right->m_ember.XformCount() > MAX_XFORMS );
 
   left->mutate( mutationStrength );
   right->mutate( mutationStrength );
@@ -77,15 +128,18 @@ QPair< AbstractScene*, AbstractScene* > EmberScene::breed( AbstractScene *other,
 
 void EmberScene::mutateOnce()
 {
-  // mutate ALL THE THINGS!
-  std::vector<EmberNs::eVariationId> vars;
-  for ( int i = VAR_ARCH; i <= VAR_ZTRANSLATE; ++ i )
-    vars.push_back( static_cast< EmberNs::eVariationId > ( i ) );
+  Ember<EMBER_PRECISION> mutated( m_ember );
+  std::vector<EmberNs::eVariationId> vars(this->vars());
 
   if ( s_tools )
-    s_tools->Mutate( m_ember, MUTATE_NOT_SPECIFIED, vars, 0, 0.1 );
+    s_tools->Mutate( mutated, MUTATE_NOT_SPECIFIED, vars, 0, 0.1 );
   else
     throw EmberRendererNotInitialisedException();
+
+  if ( mutated.XformCount() > MAX_XFORMS )
+    mutateOnce();
+  else
+    m_ember = mutated;
 }
 
 void EmberScene::saveToFile( const QString &fn )
