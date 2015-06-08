@@ -52,7 +52,8 @@ void EmberScene::randomise()
 
   m_ember.m_FinalRasW = m_width;
   m_ember.m_FinalRasH = m_height;
-  m_ember.m_PixelsPerUnit = 20;
+  m_ember.m_PixelsPerUnit = 240;
+  m_ember.m_Quality = 50;
 }
 
 QPair< AbstractScene*, AbstractScene* > EmberScene::breed( AbstractScene *other, int mutationStrength )
@@ -146,6 +147,8 @@ bool EmberScene::renderTo( QImage &image )
     static vector<byte> imgBytes;
     if ( imgBytes.size() == 0 )
       imgBytes.resize( m_width * m_height * 4, 0xff0000ff );
+
+    m_ember.m_Quality = 50;
 
     s_renderer->SetEmber( m_ember );
     if ( s_renderer->Run( imgBytes ) == RENDER_OK )
