@@ -38,7 +38,7 @@ macx {
   LIBS += -L/usr/local/Cellar/opencv/2.4.9/lib/ -lopencv_core -lopencv_objdetect -lopencv_imgproc
 }
 
-unix {
+linux-g++ {
   LIBS += -lopencv_core -lopencv_objdetect -lopencv_imgproc -lOpenCL
 }
 
