@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui svg
+QT       += core gui svg concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,6 +12,7 @@ TARGET = triangles
 TEMPLATE = app
 
 FRACTORIUM_DIR = $$(HOME)/Dev/fractorium/Bin
+debug:FRACTORIUM_DIR = $$(HOME)/Dev/fractorium/Dbg
 
 LIBS += -L$$FRACTORIUM_DIR -lEmber
 LIBS += -L$$FRACTORIUM_DIR -lEmberCL
@@ -37,17 +38,23 @@ macx {
   LIBS += -L/usr/local/Cellar/opencv/2.4.9/lib/ -lopencv_core -lopencv_objdetect -lopencv_imgproc
 }
 
+unix {
+  LIBS += -lopencv_core -lopencv_objdetect -lopencv_imgproc -lOpenCL
+}
+
 native {
   QMAKE_CXXFLAGS += -march=native
 } else {
   QMAKE_CXXFLAGS += -march=k8
 }
 
-CMAKE_CXXFLAGS += -DCL_USE_DEPRECATED_OPENCL_1_1_APIS
+QMAKE_CXXFLAGS += -DCL_USE_DEPRECATED_OPENCL_1_1_APIS
 
 INCLUDEPATH += ./fractorium/Source/Ember
 INCLUDEPATH += ./fractorium/Source/EmberCL
 INCLUDEPATH += ./fractorium/Source/EmberCommon
+
+QMAKE_CXXFLAGS_RELEASE += -O2
 
 INCLUDEPATH += /usr/include/libxml2
 
@@ -91,7 +98,8 @@ HEADERS  += triangles.h \
     randomiser.h \
     trianglescene.h \
     abstractscene.h \
-    emberscene.h
+    emberscene.h \
+    x11_undefs.h
 
 FORMS    += triangles.ui
 

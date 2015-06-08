@@ -11,6 +11,8 @@
 #include <QMutex>
 #include <QException>
 
+#define EMBER_PRECISION float
+
 class EmberRendererNotInitialisedException : public QException
 {
 public:
@@ -50,13 +52,13 @@ protected:
 
 private:
   static QMutex s_renderMutex;
-  static EmberCLns::RendererCL<double> *s_renderer;
-  static EmberNs::SheepTools<double, double> *s_tools;
+  static EmberCLns::RendererCL<EMBER_PRECISION> *s_renderer;
+  static EmberNs::SheepTools<EMBER_PRECISION, EMBER_PRECISION> *s_tools;
 
   int m_width;
   int m_height;
 
-  EmberNs::Ember<double> m_ember;
+  EmberNs::Ember<EMBER_PRECISION> m_ember;
 };
 
 #endif // EMBERSCENE_H

@@ -6,8 +6,8 @@
 #include <QFile>
 
 QMutex EmberScene::s_renderMutex;
-EmberCLns::RendererCL<double> *EmberScene::s_renderer = 0;
-EmberNs::SheepTools<double, double> *EmberScene::s_tools = 0;
+EmberCLns::RendererCL<EMBER_PRECISION> *EmberScene::s_renderer = 0;
+EmberNs::SheepTools<EMBER_PRECISION, EMBER_PRECISION> *EmberScene::s_tools = 0;
 
 EmberScene::EmberScene( int width, int height )
   :AbstractScene()
@@ -92,7 +92,7 @@ void EmberScene::saveToFile( const QString &fn )
   QFile f( fn );
   if ( f.open( QFile::WriteOnly | QFile::Truncate ) )
   {
-    EmberNs::EmberToXml<double> serializer;
+    EmberNs::EmberToXml<EMBER_PRECISION> serializer;
     serializer.Save( fn.toStdString(), m_ember, 0, false, false, false );
 //    std::string s;
 //    s = serializer.ToString( m_ember, 0, false, false, true );
@@ -108,7 +108,7 @@ void EmberScene::saveToStream( QDataStream &stream )
 {
   // I'm worried that this might be too slow :/
 
-  EmberNs::EmberToXml<double> serializer;
+  EmberNs::EmberToXml<EMBER_PRECISION> serializer;
   stream << m_width;
   stream << m_height;
   std::string s( serializer.ToString( m_ember, 0, false, false, true ) );
@@ -121,7 +121,7 @@ void EmberScene::loadFromStream( QDataStream &stream )
   // I'm worried that this might be too slow :/
 
   QString s;
-  std::vector<EmberNs::Ember<double>> embers;
+  std::vector<EmberNs::Ember<EMBER_PRECISION>> embers;
 
   stream >> m_width;
   stream >> m_height;
@@ -130,7 +130,7 @@ void EmberScene::loadFromStream( QDataStream &stream )
   QByteArray bs( s.toUtf8() );
   bs.append( static_cast< char > ( 0 ) );
 
-  EmberNs::XmlToEmber<double> serializer;
+  EmberNs::XmlToEmber<EMBER_PRECISION> serializer;
   serializer.Parse( reinterpret_cast< byte * > ( bs.data() ), "", embers );
   m_ember = embers[0];
 }
@@ -191,8 +191,8 @@ bool EmberScene::initialiseRenderer( const QString &palettePath, int platform, i
 {
   destroyRenderer();
 
-  s_renderer = new EmberCLns::RendererCL<double>( platform, device );
-  s_tools = new EmberNs::SheepTools<double, double>( palettePath.toStdString(), s_renderer );
+  s_renderer = new EmberCLns::RendererCL<EMBER_PRECISION>( platform, device );
+  s_tools = new EmberNs::SheepTools<EMBER_PRECISION, EMBER_PRECISION>( palettePath.toStdString(), s_renderer );
 
   return true;
 }

@@ -1,10 +1,12 @@
 #include "triangles.h"
 
+#include "x11_undefs.h"
+
 #include <QFileDialog>
 #include <QGraphicsPixmapItem>
 #include <QDateTime>
 #include <QThreadPool>
-#include <QtConcurrent/QtConcurrent>
+#include <QtConcurrent>
 #include <QFuture>
 #include <QPicture>
 #include <QPainter>
