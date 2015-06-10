@@ -35,7 +35,11 @@ Triangles::Triangles(QWidget *parent, Qt::WindowFlags flags)
   connect( ui.start, SIGNAL( clicked() ), this, SLOT( run() ) );
   connect( ui.stop, SIGNAL( clicked() ), this, SLOT( stop() ) );
   connect( ui.selectTarget, SIGNAL( clicked() ), this, SLOT( selectTarget() ) );
-  connect( ui.useFlames, SIGNAL( toggled(bool) ), this, SLOT( setFrame() ) );
+  connect( ui.useFlames, SIGNAL( toggled(bool) ), this, SLOT( setMethodFrame() ) );
+  connect( ui.useTriangles, SIGNAL( toggled(bool) ), this, SLOT( setMethodFrame() ) );
+  connect( ui.usePsfw, SIGNAL( toggled(bool) ), this, SLOT( setFitnessFrame() ) );
+  connect( ui.usePs, SIGNAL( toggled(bool) ), this, SLOT( setFitnessFrame() ) );
+  connect( ui.useSsim, SIGNAL( toggled(bool) ), this, SLOT( setFitnessFrame() ) );
 
   foreach( std::string platform, m_oclWrapper.PlatformNames() )
     ui.openclPlatform->addItem( QString::fromStdString( platform ) );
@@ -555,12 +559,22 @@ bool Triangles::removeDir(const QString &dirName)
   return result;
 }
 
-void Triangles::setFrame()
+void Triangles::setMethodFrame()
 {
   if (ui.useTriangles->isChecked())
     ui.inputFrameGroup->setCurrentIndex(0);
   else
     ui.inputFrameGroup->setCurrentIndex(1);
+}
+
+void Triangles::setFitnessFrame()
+{
+  if (ui.usePsfw->isChecked())
+    ui.fitnessFrameGroup->setCurrentIndex(0);
+  if (ui.usePs->isChecked())
+    ui.fitnessFrameGroup->setCurrentIndex(1);
+  if (ui.useSsim->isChecked())
+    ui.fitnessFrameGroup->setCurrentIndex(2);
 }
 
 void Triangles::populateDeviceList()
