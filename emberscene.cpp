@@ -198,9 +198,7 @@ bool EmberScene::renderTo( QImage &image )
   {
     s_renderMutex.lock();
 
-    static vector<byte> imgBytes;
-    if ( imgBytes.size() == 0 )
-      imgBytes.resize( m_width * m_height * 4, 0xff0000ff );
+    std::vector<byte> imgBytes( m_width * m_height * 4, 0xff0000ff );
 
     m_ember.m_Quality = 50;
 
