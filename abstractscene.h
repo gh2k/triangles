@@ -11,9 +11,9 @@ public:
   virtual ~AbstractScene();
 
   /// returns the cached fitness for this scene
-  double fitness() const { return m_fitness; }
+  float fitness() const { return m_fitness; }
   /// sets the cached fitness for this scene
-  void setFitness( double _fitness ) { m_fitness = _fitness; }
+  void setFitness( float _fitness ) { m_fitness = _fitness; }
 
   /// renders the scene to an image
   virtual bool renderTo( QImage &image ) = 0;
@@ -45,7 +45,7 @@ protected:
   virtual void mutateOnce() = 0;
 
 private:
-  double m_fitness;
+  float m_fitness;
 };
 
 #endif // ABSTRACTSCENE_H

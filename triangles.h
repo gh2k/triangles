@@ -6,7 +6,8 @@
 
 #include <QImage>
 
-#include "trianglescene.h"
+#include "abstractscene.h"
+#include "abstractfitness.h"
 #include <qmath.h>
 
 #include <OpenCLWrapper.h>
@@ -46,22 +47,16 @@ private:
 
   /// removes a directory, recursively
   static bool removeDir(const QString &dirName);
-  
-  /// calculates the fitness for a particular image (how similar it is to the candidate image)
-  static double getFitness( const QImage &candidate, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight );
 
   /// re-renders the current candidate, to show progress
   void updateCandidateView();
 
   /// updates all progress variables on the main dialog, and triggers an update of the candidate view
-  void updateDialog( int iterations, quint64 acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations, double iterationsPerSec );
-
-  /// renders a scene and calcuates the similarity to the target image
-  static void calculateFitnessForScene( AbstractScene *TriangleScene, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight );
-
-  /// compares two scenes, and returns true if scene a has better fitnesss
-  inline static bool sceneHasBetterFitness( AbstractScene *a, AbstractScene *b ) { return a->fitness() < b->fitness(); }
+  void updateDialog( int iterations, quint64 acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations, float iterationsPerSec );
   
+  /// calculates the fitness for a scene, and stores the fitness value within the scene
+  static void calculateFitnessForScene( const AbstractFitness *fitness, AbstractScene *scene );
+
   Ui::trianglesClass ui;
 
   QImage m_bestCandidate;
@@ -69,17 +64,11 @@ private:
   QImage m_target;
   QImage m_targetRender;
 
-  QImage m_faceMask;
-  QList< QRect > m_faces;
-  int m_faceWeight;
-
-  QVector< unsigned char * > m_pixelWeights;
-
   QString m_imageFilename;
 
   bool m_running;
-  double m_bestFitness;
-  double m_currentFitness;
+  float m_bestFitness;
+  float m_currentFitness;
 
   EmberCLns::OpenCLWrapper m_oclWrapper;
 

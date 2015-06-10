@@ -89,7 +89,8 @@ SOURCES += main.cpp\
     randomiser.cpp \
     trianglescene.cpp \
     abstractscene.cpp \
-    emberscene.cpp
+    emberscene.cpp \
+    faceweightedpixelsumfitness.cpp
 
 HEADERS  += triangles.h \
     facedetect.h \
@@ -99,7 +100,9 @@ HEADERS  += triangles.h \
     trianglescene.h \
     abstractscene.h \
     emberscene.h \
-    x11_undefs.h
+    x11_undefs.h \
+    abstractfitness.h \
+    faceweightedpixelsumfitness.h
 
 FORMS    += triangles.ui
 

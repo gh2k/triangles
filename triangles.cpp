@@ -3,19 +3,16 @@
 #include "x11_undefs.h"
 
 #include <QFileDialog>
-#include <QGraphicsPixmapItem>
 #include <QDateTime>
 #include <QThreadPool>
 #include <QtConcurrent>
 #include <QFuture>
-#include <QPicture>
-#include <QPainter>
-#include <QSvgGenerator>
 #include <QMessageBox>
+#include <QGraphicsPixmapItem>
 
 #include "trianglescene.h"
 #include "emberscene.h"
-#include "facedetect.h"
+#include "faceweightedpixelsumfitness.h"
 #include "randomiser.h"
 
 Triangles::Triangles(QWidget *parent, Qt::WindowFlags flags)
@@ -53,13 +50,13 @@ Triangles::~Triangles()
 
 }
 
-void Triangles::calculateFitnessForScene( AbstractScene *scene, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight )
+void Triangles::calculateFitnessForScene( const AbstractFitness *fitness, AbstractScene *scene )
 {
-  QImage candidateImage( target );
+  QImage candidateImage( fitness->target() );
   while ( ! scene->renderTo( candidateImage ) )
     scene->randomise();
 
-  scene->setFitness( getFitness( candidateImage, target, pixelWeights, faceWeight ) );
+  scene->setFitness( fitness->getFitness( candidateImage ) );
 }
 
 void Triangles::run()
@@ -89,7 +86,7 @@ void Triangles::run()
   m_currentFitness = -1;
   m_bestFitness = -1;
 
-  double iterationsPerSec = 0;
+  float iterationsPerSec = 0;
 
   QList< AbstractScene* > previousAge;
   QList< AbstractScene* > nextAge;
@@ -102,8 +99,10 @@ void Triangles::run()
   bestScenesFile.open( QFile::WriteOnly | QFile::Truncate );
   QDataStream bestScenes( &bestScenesFile );
 
-  m_faceWeight = ui.faceWeight->value();
+  int faceWeight = ui.faceWeight->value();
   m_running = true;
+
+  AbstractFitness *fitness = new FaceWeightedPixelSumFitness( m_target, faceWeight);
 
   int age = 0;
   int culture = 0;
@@ -178,10 +177,7 @@ void Triangles::run()
         if ( scenetype == EMBERS )
           pool.append( new EmberScene( m_target.width(), m_target.height() ) );
 
-        while ( !pool[i]->renderTo( m_currentCandidate ) )
-          pool[i]->randomise();
-
-        pool[i]->setFitness( getFitness( m_currentCandidate, m_target, m_pixelWeights, m_faceWeight ) );
+        calculateFitnessForScene( fitness, pool[i] );
       }
     } else {
       // randomly take scenes from theprevious age to populate this one
@@ -194,13 +190,13 @@ void Triangles::run()
     // calculate the current and best fitness for this age, based on the new culture
     for( int i = 0; i < populationSize; ++ i )
     {
-      if ( pool[i]->fitness() < m_currentFitness || m_currentFitness < 0 )
+      if ( fitness->isBetterFitness( pool[i]->fitness(), m_currentFitness ) || m_currentFitness < 0 )
       {
         m_currentFitness = pool[i]->fitness();
 
         pool[i]->renderTo( m_currentCandidate );
       }
-      if ( pool[i]->fitness() < m_bestFitness || m_bestFitness < 0 )
+      if ( fitness->isBetterFitness( pool[i]->fitness(), m_bestFitness ) || m_bestFitness < 0 )
       {
         m_bestFitness = pool[i]->fitness();
 
@@ -236,8 +232,8 @@ void Triangles::run()
         QPair< AbstractScene*, AbstractScene* > children = p1->breed( p2, ui.mutationStrength->value() );
 
         // run the fitness function for the newly-generated children using the thread pool
-        futures << QtConcurrent::run( calculateFitnessForScene, children.first, m_target, m_pixelWeights, m_faceWeight );
-        futures << QtConcurrent::run( calculateFitnessForScene, children.second, m_target, m_pixelWeights, m_faceWeight );
+        futures << QtConcurrent::run( calculateFitnessForScene, fitness, children.first );
+        futures << QtConcurrent::run( calculateFitnessForScene, fitness, children.second );
 
         // add both parents and both clildren to the next generation's pool
         gen2 << p1;
@@ -255,10 +251,10 @@ void Triangles::run()
       }
 
       // sort the next generation by fitness
-      qSort( gen2.begin(), gen2.end(), sceneHasBetterFitness );
+      qSort( gen2.begin(), gen2.end(), fitness->sceneHasBetterFitnessMethod() );
 
       // if the next generation has a better fitness than the current best fitness, update the candidate data
-      if ( gen2.first()->fitness() < m_currentFitness )
+      if ( fitness->isBetterFitness( gen2.first()->fitness(), m_currentFitness ) )
       {
         ++ improvements;
         m_currentFitness = gen2.first()->fitness();
@@ -267,7 +263,7 @@ void Triangles::run()
 
         gen2.first()->renderTo( m_currentCandidate );
 
-        if ( m_currentFitness < m_bestFitness )
+        if ( fitness->isBetterFitness( m_currentFitness, m_bestFitness ) )
         {
           m_bestFitness = m_currentFitness;
           delete bestScene;
@@ -302,11 +298,11 @@ void Triangles::run()
 
       // clear the next pool and sort the current data, ready for another iteration
       qDeleteAll( gen2 );
-      qSort( pool.begin(), pool.end(), sceneHasBetterFitness );
+      qSort( pool.begin(), pool.end(), fitness->sceneHasBetterFitnessMethod() );
 
       ++ iterations;
 
-      iterationsPerSec = static_cast< double > ( iterations ) / static_cast< double > ( timer.elapsed() / 1000 );
+      iterationsPerSec = static_cast< float > ( iterations ) / static_cast< float > ( timer.elapsed() / 1000 );
 
       // update the window if we've covered enough iterations
       if ( iterations % ui.updateFrequency->value() == 0 )
@@ -362,7 +358,7 @@ void Triangles::run()
   while( ! bestScenesLoader.atEnd() )
   {
     int iteration;
-    double fitness;
+    float fitness;
     bestScenesLoader >> iteration;
     bestScenesLoader >> fitness;
     QString bsFilePath = bsDir.absoluteFilePath( QString( "%1.%2.svg" ).arg( count, 7, 10, QLatin1Char( '0' ) ).arg( iteration ) );
@@ -423,7 +419,7 @@ void Triangles::run()
     EmberScene::destroyRenderer();
 }
 
-void Triangles::updateDialog( int iterations, quint64 acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations, double iterationsPerSec )
+void Triangles::updateDialog( int iterations, quint64 acceptCount, int improvements, int age, int culture, int maxCultures, int maxIterations, float iterationsPerSec )
 {
   ui.iteration->setText( QString::number( iterations ) + "/" + QString::number( maxIterations ) );
   ui.acceptCount->setText( QString::number( acceptCount ) );
@@ -482,36 +478,10 @@ void Triangles::selectTarget()
     if ( ! m_target.isNull() )
     {
       m_target = m_target.convertToFormat( QImage::Format_RGB32 );
-      m_targetRender = m_target.convertToFormat( QImage::Format_RGB32 );
-      m_faces = detectFaces( m_target );
 
-      QPainter p( &m_targetRender );
-      p.setBrush( Qt::NoBrush );
-      p.setPen( QPen( QColor( 255, 0, 0 ), 4.0 ) );
-      for( int i = 0; i < m_faces.count(); ++ i )
-        p.drawEllipse( m_faces.at( i ) );
-
-      QGraphicsPixmapItem *item = ui.target->scene()->addPixmap( QPixmap::fromImage( m_targetRender ) );
+      QGraphicsPixmapItem *item = ui.target->scene()->addPixmap( QPixmap::fromImage( m_target ) );
       ui.target->fitInView( item, Qt::KeepAspectRatio );
       m_imageFilename = imageFile;
-
-      m_faceMask = QImage( m_target.size(), QImage::Format_RGB32 );
-      m_faceMask.fill( 0 );
-      QPainter pm( &m_faceMask );
-      pm.setPen( Qt::NoPen );
-      pm.setBrush( QColor( 255, 255, 255 ) );
-      for( int i = 0; i < m_faces.count(); ++ i )
-        pm.drawEllipse( m_faces.at( i ) );
-
-      m_pixelWeights.resize( m_faceMask.height() );
-      for( int y = 0; y < m_faceMask.height(); ++ y )
-      {
-        m_pixelWeights[y] = new unsigned char[m_faceMask.width()];
-        for( int x = 0; x < m_faceMask.width(); ++ x )
-        {
-          m_pixelWeights[y][x] = qRed(m_faceMask.pixel(x, y)) > 0 ? 1 : 0;
-        }
-      }
     }
   }
 }
@@ -531,37 +501,6 @@ void Triangles::resizeEvent( QResizeEvent *e )
   items = ui.bestCandidate->scene()->items();
   if ( items.count() == 1 )
     ui.bestCandidate->fitInView( items.first(), Qt::KeepAspectRatio );
-}
-
-double Triangles::getFitness( const QImage &candidate, const QImage &target, const QVector< unsigned char * > &pixelWeights, int faceWeight )
-{
-  double f = 0;
-  int w = target.width();
-  int h = target.height();
-  for( int y = 0; y < h; ++ y )
-  {
-    const uchar *targetLine = target.scanLine( y );
-    const uchar *candidateLine = candidate.scanLine( y );
-    const uchar *weights = pixelWeights[y];
-
-    // calculates the difference between pixels on the two images
-    for( int x = 0; x < w; ++ x )
-    {
-      double dB = (double)(*(targetLine++) - *(candidateLine++));
-      double dG = (double)(*(targetLine++) - *(candidateLine++));
-      double dR = (double)(*(targetLine++) - *(candidateLine++));
-      ++targetLine; ++candidateLine;
-
-      // larger number is better. multiplies pixels detected as part of a face by faceWeight
-      // this gives a better weighting to face pixels and will accept candidates that have a better
-      // match for those areas
-      double pixelFitness = (dR * dR + dG * dG + dB * dB) * (double)(faceWeight * weights[x] + 1 );
-
-      f += pixelFitness;
-    }
-  }
-
-  return f;
 }
 
 void Triangles::updateCandidateView()
